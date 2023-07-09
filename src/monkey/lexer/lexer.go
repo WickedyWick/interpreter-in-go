@@ -14,19 +14,10 @@ func New(input string) *Lexer {
   return l
 }
 
-func (l *Lexer) readChar() {
-  if l.readPosition >= len(l.input) {
-      // 0 is NUL ASCII representation so we can use it for EOF
-    l.ch = 0
-  } else {
-    l.ch = l.input[l.readPosition]
-  }
-  l.position = l.readPosition
-  l.readPosition += 1
-}
-
 func (l *Lexer) NextToken() token.Token {
   var tok token.Token
+  // Need to skip whitespace because in our language its only used as separator of tokens and doesn't have a meaning 
+  l.skipWhitespace()
   switch l.ch {
     case '=':
       tok = newToken(token.ASSIGN, l.ch)
@@ -60,10 +51,23 @@ func (l *Lexer) NextToken() token.Token {
   return tok
 } 
 
+func (l *Lexer) readChar() {
+  if l.readPosition >= len(l.input) {
+      // 0 is NUL ASCII representation so we can use it for EOF
+    l.ch = 0
+  } else {
+    l.ch = l.input[l.readPosition]
+  }
+  l.position = l.readPosition
+  l.readPosition += 1
+}
+
 func newToken(tokenType token.TokenType, ch byte) token.Token {
   return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
+// We could probably generalize this by passing in the character`s identifying functions as arguments, but won’t,
+// for simplicity’s sake and ease of understanding ----------- readIdentifier & readNumber
 func (l *Lexer) readIdentifier() string {
   position := l.position
   for isLetter(l.ch) {
@@ -72,6 +76,23 @@ func (l *Lexer) readIdentifier() string {
   return l.input[position:l.position]
 }
 
+func (l *Lexer) readNumber() string {
+  position := l.position
+  for isDigit(l.ch) {
+    l.readChar()
+  }
+  return l.input[position:l.position]
+}
 func isLetter(ch byte) bool {
   return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func isDigit(ch byte) bool {
+  return '0' <= ch && ch <= '9'
+}
+func skipWhitespace(l* Lexer) {
+  // I think in go you can write conditional for loop or I guess this is whileDoLoop
+  for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+    l.readChar() 
+  }
 }
