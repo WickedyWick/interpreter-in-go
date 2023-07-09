@@ -7,7 +7,7 @@ type Token struct {
     Literal string
 }
 
-const {
+const (
     ILLEGAL = "ILLEGAL"
     EOF = "EOF"
     
@@ -31,4 +31,19 @@ const {
     // Keywords
     FUNCTION = "FUNCTION"
     LET = "LET" 
+)
+
+var keywords = map[string]TokenType{
+  "fn": FUNCTION,
+  "let": LET,
+}
+
+func LookupIdent(ident string) TokenType {
+  // We declare tokenType (tok) variable and "ok" is true if value exists and false if it doesnt
+  // with so basically we first declare variables and then check for values after semicolon
+  // if its not one of our keywords its identifier (variable name) 
+  if tok, ok := keywords[ident]; ok {
+    return tok
+  }
+  return IDENT
 }
